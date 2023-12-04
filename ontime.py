@@ -4,6 +4,7 @@ class Task:
         self.priority = priority
         self.description = description
 
+
 def organize_schedule(tasks, fixed_hours):
     # Sorting tasks based on priority
     sorted_tasks = sorted(tasks, key=lambda x: x.priority, reverse=True)
@@ -13,8 +14,12 @@ def organize_schedule(tasks, fixed_hours):
 
     # Mark fixed hours as unavailable
     for start, end, task_name in fixed_hours:
-        for i in range(start, end):
-            schedule[i] = f"fixed: {task_name}"
+        if end > start:  # Corrected condition
+            schedule[start:end] = [f"{task_name}"] * (end - start)
+        else:
+            # Handle the case where end < start (overnight fixed hours)
+            schedule[start:] = [f"{task_name}"] * (24 - start)
+            schedule[:end] = [f"{task_name}"] * end
 
     # Iterate through sorted tasks
     for task in sorted_tasks:
@@ -30,6 +35,7 @@ def organize_schedule(tasks, fixed_hours):
     for i, slot in enumerate(schedule):
         print("{}:00 - {}:00: {}".format(i, i + 1, slot))
 
+
 # User input for fixed hours with debugging for bad input
 fixed_hours = []
 while True:
@@ -40,7 +46,7 @@ while True:
         start_time = int(input("Enter start time for fixed task (0-23): "))
         end_time = int(input("Enter end time for fixed task (0-23): "))
 
-        if not (0 <= start_time <= 23) or not (0 <= end_time <= 23) or end_time <= start_time:
+        if not (0 <= start_time <= 23) or not (0 <= end_time <= 23):
             raise ValueError("Invalid input. Please enter valid start and end times.")
 
         fixed_hours.append((start_time, end_time, task_name))
